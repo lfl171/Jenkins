@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1424">
+  <meta name="description" content="从安装 Jenkins、编写 Pipeline，到企业级安全、弹性扩展与治理，循序构建可靠的持续交付平台。">
+  <title>从 Jenkins 小白到企业级｜工程效能实践</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #142338; --muted: #63738a; --soft: #8795a8; --line: #e7edf4;
+      --paper: #fff; --canvas: #f5f7fb; --navy: #0b1424; --navy2: #101e34;
+      --blue: #3978f6; --cyan: #52d5cf; --green: #23a98e; --amber: #efa84a;
+      --shadow: 0 18px 50px rgba(21, 42, 76, .09); --radius: 18px;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font: 15px/1.8 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    .topbar { height: 66px; background: rgba(11,20,36,.97); color: #dfe8f8; border-bottom: 1px solid rgba(255,255,255,.09); display:flex; align-items:center; position: sticky; top:0; z-index:10; backdrop-filter: blur(14px); }
+    .topbar-inner { width:min(1240px, calc(100% - 48px)); margin:auto; display:flex; align-items:center; gap:34px; }
+    .brand { display:flex; align-items:center; gap:11px; font-weight:750; letter-spacing:.02em; white-space:nowrap; }
+    .brand-mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center; color:white; font-size:13px; font-weight:800; background:linear-gradient(140deg,#54d4cf,#3678f5); box-shadow:0 5px 18px #3978f655; }
+    .brand small { color:#8697b0; font-size:10px; font-weight:600; margin-left:2px; letter-spacing:.12em; }
+    .nav { display:flex; gap:26px; color:#9eacc0; font-size:13px; }
+    .nav a:hover { color:#fff; }
+    .nav-right { margin-left:auto; display:flex; align-items:center; gap:14px; font-size:12px; color:#a6b4c8; }
+    .nav-pill { border:1px solid #33445c; border-radius:999px; padding:5px 11px; color:#c9d5e5; }
+    .progress-track { height:2px; position:absolute; bottom:0; left:0; width:100%; background:transparent; }
+    .progress-bar { width:0; height:100%; background:linear-gradient(90deg,var(--cyan),var(--blue)); }
+    .hero { color:white; background:radial-gradient(ellipse at 80% 20%,rgba(54,120,245,.20),transparent 38%), radial-gradient(ellipse at 63% 110%,rgba(48,196,176,.13),transparent 35%), linear-gradient(120deg,#0b1424,#101d32 60%,#0c172a); overflow:hidden; position:relative; }
+    .hero:after { content:""; position:absolute; right:-110px; top:-205px; width:550px; height:550px; border:1px solid rgba(146,180,231,.08); border-radius:50%; box-shadow:0 0 0 60px rgba(146,180,231,.025),0 0 0 120px rgba(146,180,231,.018); }
+    .hero-inner { width:min(1240px, calc(100% - 48px)); margin:auto; position:relative; z-index:1; padding:70px 0 78px; }
+    .eyebrow { display:flex; align-items:center; gap:10px; color:#91a5c1; font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
+    .eyebrow:before { content:""; width:22px; height:1px; background:var(--cyan); }
+    h1 { font-size:clamp(35px,5vw,58px); line-height:1.2; letter-spacing:-.045em; margin:23px 0 18px; max-width:800px; font-weight:770; }
+    h1 em { color:#64d8d0; font-style:normal; }
+    .hero-copy { max-width:700px; color:#a9b7ca; font-size:16px; line-height:1.9; margin:0; }
+    .hero-meta { display:flex; align-items:center; gap:20px; margin-top:30px; color:#8ea0b8; font-size:12px; }
+    .author { display:flex; gap:10px; align-items:center; color:#d5dfec; }
+    .avatar { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; color:#c9fff7; font-weight:700; background:linear-gradient(135deg,#2caeaa,#315eaa); border:1px solid #ffffff28; }
+    .meta-divider { width:1px; height:16px; background:#34445c; }
+    .hero-tags { margin-top:28px; display:flex; flex-wrap:wrap; gap:8px; }
+    .hero-tags span { border:1px solid #30425c; background:#ffffff08; color:#b1c1d5; border-radius:6px; padding:4px 9px; font-size:11px; }
+    .layout { width:min(1240px, calc(100% - 48px)); margin:36px auto 88px; display:grid; grid-template-columns:220px minmax(0, 760px) 188px; gap:34px; align-items:start; }
+    .toc { position:sticky; top:91px; padding:16px 0; }
+    .toc-title { color:#91a0b4; text-transform:uppercase; font-weight:700; letter-spacing:.12em; font-size:10px; margin:0 0 12px 13px; }
+    .toc a { display:block; color:#687990; font-size:12px; line-height:1.5; padding:7px 11px; border-left:2px solid transparent; transition:.2s; }
+    .toc a:hover,.toc a.active { color:#2866df; border-left-color:#3978f6; background:#eaf1ff; border-radius:0 6px 6px 0; }
+    .toc .sub { padding-left:25px; font-size:11px; color:#8a98aa; }
+    .article { background:white; border:1px solid #e8edf4; border-radius:var(--radius); padding:46px 54px 56px; box-shadow:var(--shadow); min-width:0; }
+    .article p { color:#46566c; margin:0 0 18px; }
+    .article h2 { font-size:26px; line-height:1.35; letter-spacing:-.025em; margin:54px 0 18px; padding-top:3px; scroll-margin-top:92px; }
+    .article h2 .num { display:inline-grid; place-items:center; width:31px; height:31px; margin-right:10px; color:#3978f6; background:#edf3ff; border-radius:9px; font-size:13px; vertical-align:3px; }
+    .article h3 { font-size:18px; margin:31px 0 12px; letter-spacing:-.015em; }
+    .article h4 { font-size:14px; margin:22px 0 8px; }
+    .article ul,.article ol { padding-left:22px; color:#46566c; margin:8px 0 20px; }
+    .article li { padding-left:3px; margin:5px 0; }
+    .article li::marker { color:#6a92e9; }
+    .lead { font-size:17px; line-height:1.95; color:#33465f!important; }
+    .intro-card { padding:21px 23px; background:linear-gradient(135deg,#f2f7ff,#f5fbfa); border:1px solid #e1ebf8; border-radius:13px; margin:26px 0 29px; }
+    .intro-card strong { color:#244e92; }
+    .callout { display:flex; gap:13px; padding:16px 18px; margin:22px 0; background:#f2f7ff; border:1px solid #e0ebfc; border-left:3px solid #4c83f4; border-radius:8px; color:#4a5c73; font-size:13px; }
+    .callout .icon { flex:0 0 22px; height:22px; display:grid; place-items:center; border-radius:50%; background:#dce9ff; color:#3978f6; font-size:12px; font-weight:800; }
+    .callout p { margin:0; font-size:13px; }
+    .callout.success { border-color:#d9efe9; border-left-color:#29a78d; background:#f1faf7; }
+    .callout.success .icon { color:#1a9279; background:#d9f2ea; }
+    .code { margin:18px 0 24px; background:#101a2a; border-radius:11px; overflow:hidden; box-shadow:0 8px 22px #14233812; }
+    .code-head { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-bottom:1px solid #ffffff12; color:#a7b5c9; font-size:11px; }
+    .dots { display:flex; gap:5px; margin-right:8px; }
+    .dots i { width:7px; height:7px; border-radius:50%; background:#53627a; }
+    .dots i:first-child { background:#f17f76; } .dots i:nth-child(2) { background:#efbd59; } .dots i:nth-child(3) { background:#5bc79a; }
+    .code-label { display:flex; align-items:center; }
+    .copy { color:#a7b5c9; background:none; border:1px solid #35465e; border-radius:5px; padding:3px 8px; font-size:10px; cursor:pointer; }
+    .copy:hover { color:white; border-color:#778ba8; }
+    pre { overflow:auto; padding:17px 18px 20px; margin:0; color:#d5e1f0; font:12px/1.85 var(--mono); tab-size:2; }
+    code { font-family:var(--mono); }
+    p code,li code { color:#2e61b5; background:#edf3fc; border-radius:4px; padding:2px 5px; font-size:.88em; }
+    .kw { color:#c792ea; } .fn { color:#82aaff; } .str { color:#c3e88d; } .cm { color:#71819a; font-style:italic; } .var { color:#f78c6c; } .numlit { color:#f2c76e; }
+    .table-wrap { overflow-x:auto; margin:20px 0 26px; border:1px solid var(--line); border-radius:10px; }
+    table { border-collapse:collapse; width:100%; font-size:12px; min-width:520px; }
+    th { color:#52647c; background:#f6f8fb; text-align:left; font-weight:700; }
+    td,th { padding:11px 13px; border-bottom:1px solid #edf0f5; vertical-align:top; }
+    tr:last-child td { border-bottom:0; }
+    td { color:#56667b; }
+    .badge { display:inline-block; border-radius:5px; color:#237a68; background:#e7f6f1; font-size:10px; padding:2px 7px; white-space:nowrap; }
+    .badge.blue { color:#3766bd; background:#eaf1ff; } .badge.gold { color:#a66a16; background:#fff3df; }
+    .diagram { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:22px 0 26px; }
+    .diagram .step { border:1px solid #e5ebf3; border-radius:10px; padding:13px 12px; background:#fbfcfe; position:relative; }
+    .diagram .step:not(:last-child):after { content:"›"; position:absolute; right:-9px; top:26px; z-index:1; color:#8da2c0; font-size:20px; background:white; line-height:1; }
+    .step b { display:block; color:#335785; font-size:12px; margin-bottom:5px; }
+    .step span { color:#8290a2; font-size:10px; line-height:1.5; display:block; }
+    .takeaway { margin-top:35px; padding:23px; border-radius:12px; background:linear-gradient(130deg,#101e34,#172c49); color:#dbe6f3; }
+    .takeaway h3 { margin:0 0 10px; color:white; font-size:16px; }
+    .takeaway ul { color:#b7c7da; margin:0; font-size:13px; }
+    .takeaway li::marker { color:#59d0c6; }
+    .author-card { position:sticky; top:91px; padding:17px 15px; background:white; border:1px solid #e8edf4; border-radius:12px; box-shadow:0 8px 26px rgba(21,42,76,.04); }
+    .author-card .label { color:#98a4b4; font-size:9px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; }
+    .author-card strong { display:block; font-size:13px; margin:8px 0 3px; }
+    .author-card p { color:#75849a; font-size:11px; line-height:1.65; margin:0; }
+    .reading-stat { margin-top:16px; padding-top:13px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-size:10px; color:#8391a4; }
+    .article-footer { margin-top:43px; padding-top:21px; border-top:1px solid var(--line); display:flex; justify-content:space-between; color:#8996a7; font-size:11px; }
+    .article-footer strong { color:#4b617f; }
+    footer { background:#0b1424; color:#8291a7; padding:29px 24px; font-size:11px; }
+    .footer-inner { max-width:1240px; margin:auto; display:flex; justify-content:space-between; gap:20px; }
+    .footer-inner strong { color:#d2deed; }
+    @media(max-width:1100px) { .layout { grid-template-columns:190px minmax(0,760px); justify-content:center; } .author-card { display:none; } }
+    @media(max-width:760px) { .topbar-inner,.hero-inner,.layout { width:min(100% - 30px, 680px); } .topbar-inner { gap:12px; } .nav { display:none; } .nav-right { font-size:10px; } .hero-inner { padding:51px 0 54px; } .hero-meta { flex-wrap:wrap; gap:11px; } .layout { display:block; margin-top:18px; } .toc { position:static; display:flex; overflow:auto; gap:5px; padding:0 0 14px; white-space:nowrap; } .toc-title,.toc .sub { display:none; } .toc a { border:1px solid #e4eaf2; border-radius:999px; padding:6px 10px; background:white; font-size:10px; } .toc a:hover,.toc a.active { border-color:#cbdcff; border-left:1px solid #cbdcff; border-radius:999px; } .article { padding:29px 22px 36px; } .article h2 { font-size:22px; margin-top:43px; } .article h3 { font-size:17px; } .diagram { grid-template-columns:repeat(2,1fr); } .diagram .step:nth-child(2):after { display:none; } .article-footer,.footer-inner { flex-direction:column; } }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none!important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="工程效能首页"><span class="brand-mark">E</span><span>ENGINEERING NOTES <small>工程效能</small></span></a>
+      <nav class="nav" aria-label="主导航"><a href="#basics">技术专栏</a><a href="#pipeline">实践指南</a><a href="#enterprise">架构设计</a></nav>
+      <div class="nav-right"><span>DEVOPS · CI/CD</span><span class="nav-pill">深度阅读</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
+  </header>
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <div class="eyebrow">工程实践 · 持续交付</div>
+      <h1>从 Jenkins 小白<br>到<em>企业级交付平台</em></h1>
+      <p class="hero-copy">从第一个 Job 开始，理解 Pipeline 的设计哲学，再走向安全、弹性、可治理的企业级 CI/CD。把“能跑”变成“可靠地交付”。</p>
+      <div class="hero-meta"><span class="author"><span class="avatar">E</span><span>工程效能团队</span></span><span class="meta-divider"></span><span>2026 年 10 月 7 日</span><span class="meta-divider"></span><span>约 18 分钟</span></div>
+      <div class="hero-tags"><span>Jenkins</span><span>CI/CD</span><span>Pipeline as Code</span><span>DevOps</span><span>Platform Engineering</span></div>
+    </div>
+  </section>
+
+  <main class="layout">
+    <nav class="toc" aria-label="文章目录">
+      <div class="toc-title">On this page</div>
+      <a href="#intro">开篇：先建立地图</a>
+      <a href="#basics">01 · Jenkins 入门</a>
+      <a class="sub" href="#install">安装与第一个任务</a>
+      <a href="#pipeline">02 · Pipeline as Code</a>
+      <a class="sub" href="#jenkinsfile">Jenkinsfile 核心结构</a>
+      <a href="#quality">03 · 质量与制品</a>
+      <a href="#enterprise">04 · 企业级架构</a>
+      <a class="sub" href="#security">安全与凭据</a>
+      <a href="#governance">05 · 治理与运营</a>
+      <a href="#roadmap">06 · 落地路线</a>
+    </nav>
+
+    <article class="article">
+      <p class="lead" id="intro">很多团队第一次接触 Jenkins，是为了让“提交代码后自动跑一下构建”。很快，Job 越建越多、插件越装越杂、构建节点互相争抢，发布出了问题却找不到责任边界。跨过这些阶段的关键，不是再记住几个按钮，而是把 Jenkins 当成一套<strong>交付平台</strong>来设计。</p>
+      <div class="intro-card"><strong>本文路线：</strong>先用最小闭环理解 Jenkins，再用 Declarative Pipeline 固化流程，最后从身份、执行隔离、扩缩容、治理与可观测性五个方面，将它演进为团队可依赖的企业级能力。示例适合现代 Jenkins LTS 环境，实际插件与凭据 ID 请按组织策略调整。</div>
+
+      <h2 id="basics"><span class="num">01</span>Jenkins 是什么：从自动化服务器到交付编排器</h2>
+      <p>Jenkins 是一个可扩展的自动化服务器。它监听代码仓库或其他事件，按定义好的流程调度任务，并把结果反馈给团队。它本身不替你决定“什么才是正确的发布流程”，而是提供一个可编排的执行框架。</p>
+      <div class="table-wrap"><table><thead><tr><th>概念</th><th>你可以把它理解为</th><th>典型职责</th></tr></thead><tbody>
+        <tr><td>Controller（控制器）</td><td>调度中心与 Web 管理面</td><td>保存任务配置、排队、分配执行器、展示结果</td></tr>
+        <tr><td>Agent（代理节点）</td><td>真正干活的执行环境</td><td>检出代码、编译、测试、构建镜像</td></tr>
+        <tr><td>Job / Pipeline</td><td>一次自动化工作定义</td><td>描述触发方式、阶段、条件与结果处理</td></tr>
+        <tr><td>Plugin（插件）</td><td>与外部系统集成的扩展点</td><td>接入 Git、云平台、通知、凭据与分析工具</td></tr>
+      </tbody></table></div>
+      <p>最常见的流水线是：开发者提交代码，CI 执行构建与检查，生成可追踪的软件制品，再由受控流程将同一份制品交付到目标环境。请记住这条主线：<strong>输入可追溯、执行可重复、产物可验证、发布可审计</strong>。</p>
+
+      <h3 id="install">安装、首次配置与第一个任务</h3>
+      <p>试学可以用容器快速启动；生产环境则要先明确持久化存储、备份、升级和访问入口。不要把临时试验环境直接暴露到公网。安装完成后，先做这几件事：</p>
+      <ol><li>创建具名管理员账号，禁用匿名访问，确认 Jenkins URL 与时区。</li><li>仅安装当前流程需要的插件，并记下版本与来源。</li><li>添加一个 Agent 或临时执行节点，避免长期在 Controller 上跑构建。</li><li>新建 Pipeline 任务，选择从 SCM 加载脚本，提交一个最小 Jenkinsfile。</li></ol>
+      <p>一个验证安装与仓库连接的最小 Pipeline：</p>
+      <div class="code"><div class="code-head"><span class="code-label"><span class="dots"><i></i><i></i><i></i></span>Jenkinsfile</span><button class="copy" type="button">复制代码</button></div><pre><code><span class="kw">pipeline</span> {
+  <span class="kw">agent</span> any
+  <span class="kw">stages</span> {
+    <span class="kw">stage</span>(<span class="str">'验证运行环境'</span>) {
+      <span class="kw">steps</span> {
+        <span class="fn">echo</span> <span class="str">'Jenkins Pipeline is running.'</span>
+        <span class="fn">sh</span> <span class="str">'git --version'</span>
+      }
+    }
+  }
+}</code></pre></div>
+      <div class="callout"><span class="icon">i</span><p><strong>新手易混淆：</strong>Controller 是调度者，Agent 才是通常执行 shell 命令的地方。若把所有构建都放在 Controller，负载、权限和稳定性会耦合在一起。</p></div>
+
+      <h2 id="pipeline"><span class="num">02</span>把流程写进仓库：Pipeline as Code</h2>
+      <p>经典 Freestyle Job 适合很小的任务，但复杂流程一旦靠 UI 配置，就难审查、难复用，也容易出现环境间配置漂移。Pipeline as Code 将流程纳入版本控制，让每一次改动都能审阅、回滚和复现。</p>
+      <h3 id="jenkinsfile">Declarative Pipeline 的核心结构</h3>
+      <p>Jenkins Pipeline 有 Declarative 与 Scripted 两种常见写法。团队通常从 Declarative 开始：结构清楚、约束明确；遇到条件逻辑或复杂编排时，再有节制地引入脚本能力。</p>
+      <div class="code"><div class="code-head"><span class="code-label"><span class="dots"><i></i><i></i><i></i></span>Jenkinsfile · 结构示例</span><button class="copy" type="button">复制代码</button></div><pre><code><span class="kw">pipeline</span> {
+  <span class="kw">agent</span> { <span class="fn">label</span> <span class="str">'linux-builder'</span> }
+  <span class="kw">options</span> {
+    <span class="fn">timeout</span>(<span class="numlit">time</span>: <span class="numlit">30</span>, <span class="numlit">unit</span>: <span class="str">'MINUTES'</span>)
+    <span class="fn">disableConcurrentBuilds</span>()
+    <span class="fn">buildDiscarder</span>(<span class="fn">logRotator</span>(<span class="numlit">numToKeepStr</span>: <span class="str">'30'</span>))
+  }
+  <span class="kw">environment</span> { <span class="var">APP_NAME</span> = <span class="str">'orders-api'</span> }
+  <span class="kw">stages</span> {
+    <span class="kw">stage</span>(<span class="str">'检出与验证'</span>) {
+      <span class="kw">steps</span> { <span class="fn">checkout</span> scm; <span class="fn">sh</span> <span class="str">'./ci/verify.sh'</span> }
+    }
+    <span class="kw">stage</span>(<span class="str">'构建制品'</span>) {
+      <span class="kw">steps</span> { <span class="fn">sh</span> <span class="str">'./ci/package.sh'</span> }
+      <span class="kw">post</span> { <span class="fn">success</span> { <span class="fn">archiveArtifacts</span> <span class="str">artifacts: 'dist/**'</span> } }
+    }
+  }
+  <span class="kw">post</span> {
+    <span class="fn">always</span> { <span class="fn">junit</span> <span class="str">'reports/**/*.xml'</span> }
+    <span class="fn">failure</span> { <span class="fn">echo</span> <span class="str">'请查看构建日志和测试报告'</span> }
+  }
+}</code></pre></div>
+      <p>几个值得尽早养成的习惯：</p>
+      <ul><li>使用 <code>agent</code> 明确执行环境，不要依赖某台机器的默认配置。</li><li>为耗时任务设置 <code>timeout</code>，为并发写入设置适当保护。</li><li>用 <code>post</code> 收集测试报告和清理临时资源；确保失败时诊断信息仍被保存。</li><li>把业务构建脚本放进仓库中的 <code>ci/</code> 目录，Jenkinsfile 做编排，不要把全部逻辑塞入 Groovy。</li><li>按需使用多分支 Pipeline，让分支与 Pull Request 自动发现、验证。</li></ul>
+      <div class="callout success"><span class="icon">✓</span><p><strong>设计原则：</strong>流水线的每一步都应有清晰输入、明确输出和可读名称。让失败信号尽可能靠前出现，减少昂贵的下游工作。</p></div>
+
+      <h2 id="quality"><span class="num">03</span>从“构建通过”到“质量可信”</h2>
+      <p>只编译成功并不代表可以交付。健康的 CI 至少要验证代码质量、测试结果和安全基线，并将产物与源代码版本关联起来。</p>
+      <div class="diagram"><div class="step"><b>① 快速反馈</b><span>格式、静态检查、单元测试</span></div><div class="step"><b>② 构建与扫描</b><span>依赖审计、SAST、镜像扫描</span></div><div class="step"><b>③ 固化制品</b><span>不可变镜像与版本摘要</span></div><div class="step"><b>④ 受控发布</b><span>审批、部署、健康检查</span></div></div>
+      <p>测试结果要用 Jenkins 能识别的格式（例如 JUnit XML）发布，避免只把报告留在终端日志。构建制品要保留版本号、提交 SHA、构建号和依赖信息；容器镜像可使用摘要（digest）部署，避免同一个标签被覆盖后无法确定实际运行内容。</p>
+      <h3>环境晋级，而不是重复构建</h3>
+      <p>理想流程是对某次提交只构建一次，将经过验证的同一制品从开发环境晋级到预发、生产。每次重新构建都会带来工具链、依赖版本或构建参数变化的风险。部署阶段应有明确的失败回滚策略、健康检查和审计记录。</p>
+      <div class="callout"><span class="icon">i</span><p>持续交付不等于每次提交自动进入生产。哪些变更可自动发布，哪些需要审批，应由风险等级、测试覆盖和组织的变更策略决定。</p></div>
+
+      <h2 id="enterprise"><span class="num">04</span>企业级架构：隔离、弹性与可恢复</h2>
+      <p>企业使用 Jenkins 的分水岭，往往是 Controller 是否稳定、构建执行是否隔离、插件和凭据是否受控，以及故障时能否恢复服务。</p>
+      <h3>Controller 负责协调，Agent 负责执行</h3>
+      <ul><li>把构建任务放到动态或专用 Agent 上；Controller 执行器保持为零或仅运行管理任务。</li><li>按照可信度隔离执行池：来自外部贡献者的 PR、内部主干构建、发布任务使用不同的权限与节点标签。</li><li>根据队列长度、等待时间与资源使用率扩缩容；构建环境使用可版本化镜像，减少“这台机器才可以”的依赖。</li><li>缓存依赖以缩短构建时间，同时限定缓存生命周期与写入边界。</li></ul>
+      <h3 id="security">安全基线：先减少权限，再谈方便</h3>
+      <p>CI 系统天然接触源代码、包仓库和部署凭据，是高价值目标。安全设计应把“谁能改流水线”和“流水线能以谁的身份做什么”分开治理。</p>
+      <div class="table-wrap"><table><thead><tr><th>控制面</th><th>推荐实践</th></tr></thead><tbody>
+        <tr><td>身份与权限</td><td>对接企业身份源与细粒度授权；按团队和任务分配最低权限，定期审查管理员。</td></tr>
+        <tr><td>凭据管理</td><td>使用 Credentials Store 或外部密钥服务；按作用域授权、定期轮换，不把密钥写入仓库或日志。</td></tr>
+        <tr><td>代码与 PR</td><td>保护主分支；外部 PR 运行在低权限隔离环境；谨慎对待未经信任的 Jenkinsfile。</td></tr>
+        <tr><td>控制器与网络</td><td>通过受控入口访问，启用 HTTPS；限制脚本控制台与管理端点，执行及时补丁与插件更新。</td></tr>
+        <tr><td>审计与供应链</td><td>记录配置变更、审批与发布人；对制品签名或校验来源，保存 SBOM 与扫描结果。</td></tr>
+      </tbody></table></div>
+      <p>凭据示例只展示 Jenkins 的凭据绑定方式，真实环境应确保凭据 ID 有清晰命名、权限边界和轮换流程：</p>
+      <div class="code"><div class="code-head"><span class="code-label"><span class="dots"><i></i><i></i><i></i></span>Jenkinsfile · 凭据绑定示例</span><button class="copy" type="button">复制代码</button></div><pre><code><span class="kw">withCredentials</span>([
+  <span class="fn">usernamePassword</span>(
+    <span class="numlit">credentialsId</span>: <span class="str">'registry-publisher'</span>,
+    <span class="numlit">usernameVariable</span>: <span class="str">'REG_USER'</span>,
+    <span class="numlit">passwordVariable</span>: <span class="str">'REG_TOKEN'</span>
+  )
+]) {
+  <span class="fn">sh</span> <span class="str">'''set +x
+    echo "$REG_TOKEN" | docker login registry.example.com \\
+      --username "$REG_USER" --password-stdin
+    docker push registry.example.com/team/orders:${GIT_COMMIT}
+  '''</span>
+}</code></pre></div>
+      <div class="callout"><span class="icon">!</span><p><strong>注意：</strong>凭据掩码是降低意外泄漏风险的保护措施，不是密钥隔离边界。恶意或高权限脚本仍可能泄漏秘密。对不可信代码，不要暴露任何有价值的凭据。</p></div>
+      <h3>备份、升级与灾备</h3>
+      <p>Jenkins 的配置、任务元数据、凭据加密材料和插件状态都需要纳入恢复方案。定期验证备份可还原，记录插件清单与版本，先在测试环境验证升级，再安排有回退路径的生产变更。备份做过不等于恢复验证过。</p>
+
+      <h2 id="governance"><span class="num">05</span>平台治理：减少重复，保留团队自治</h2>
+      <p>当不同团队各自维护数百份相似 Pipeline，平台团队的价值不是收走所有控制权，而是提供安全的默认值和稳定的公共能力。</p>
+      <h3>共享库与流水线模板</h3>
+      <p>将组织级重复步骤封装进 Jenkins Shared Library，例如统一的制品发布、扫描、审批和通知接口。给共享库做版本管理、代码审查和兼容性策略。业务团队仍应能在仓库中看到每个服务的交付流程，而不是被迫面对一个不可理解的“黑盒按钮”。</p>
+      <h3>插件治理与运行可观测性</h3>
+      <ul><li>维护允许使用的插件清单、负责人和升级窗口；淘汰重复、无人维护或权限过大的插件。</li><li>把队列等待时长、构建时长、失败率、Agent 利用率和控制器资源纳入监控。</li><li>定义服务目标，例如关键流水线等待时间、控制器可用性和恢复时间；用数据识别瓶颈。</li><li>为构建失败分类：代码缺陷、环境故障、资源不足或外部依赖，让团队知道下一步该找谁。</li></ul>
+      <p>企业级成熟度不是“插件更多、配置更复杂”，而是平台行为可预测、故障可诊断、权限可解释，并且团队能以较低心智负担完成安全交付。</p>
+
+      <h2 id="roadmap"><span class="num">06</span>一条务实的落地路线</h2>
+      <div class="table-wrap"><table><thead><tr><th>阶段</th><th>目标</th><th>可交付结果</th></tr></thead><tbody>
+        <tr><td><span class="badge">第 1 阶段</span></td><td>建立最小闭环</td><td>一个仓库、一份 Jenkinsfile、一次测试与制品归档；明确失败通知。</td></tr>
+        <tr><td><span class="badge blue">第 2 阶段</span></td><td>标准化流程</td><td>多分支 Pipeline、质量门禁、共享脚本、可追踪制品版本。</td></tr>
+        <tr><td><span class="badge gold">第 3 阶段</span></td><td>平台化与隔离</td><td>独立 Controller/Agent、凭据治理、插件基线、备份恢复演练。</td></tr>
+        <tr><td><span class="badge">第 4 阶段</span></td><td>规模化运营</td><td>动态扩容、指标与服务目标、软件供应链证明、持续优化反馈。</td></tr>
+      </tbody></table></div>
+      <p>不要一开始就追求完整平台蓝图。选一条真实但风险可控的服务流水线作为试点，记录从提交到交付的耗时、失败原因和人工步骤。每消除一个重复操作，就把经验沉淀为模板、文档或平台能力，再逐步扩大覆盖范围。</p>
+
+      <div class="takeaway"><h3>从入门到企业级，记住这五件事</h3><ul><li>用代码定义流程，让改动可审查、可回滚。</li><li>让 Controller 做调度，让 Agent 在合适的隔离环境中执行。</li><li>构建一次、验证制品、受控晋级，保留完整追溯信息。</li><li>凭据最小授权，不可信代码绝不接触高价值秘密。</li><li>通过指标、备份演练与插件治理，持续证明平台可靠。</li></ul></div>
+      <p style="margin-top:27px">Jenkins 可以从一条小小的流水线开始，但成熟的平台从来不只是“让任务自动跑起来”。它是团队把工程约定变成日常默认、把风险控制融入交付路径的方式。先交付一个可靠的闭环，再逐步扩展，通常比一开始建造无所不包的平台走得更远。</p>
+      <div class="article-footer"><span>本文归属 <strong>工程实践 / 持续交付</strong></span><span>编辑：工程效能团队　·　最后更新：2026.10</span></div>
+    </article>
+
+    <aside class="author-card"><span class="label">About this article</span><strong>工程效能团队</strong><p>聚焦研发平台、交付工程与可持续的团队实践。</p><div class="reading-stat"><span>阅读时长</span><strong>18 min</strong></div><div class="reading-stat"><span>难度</span><strong>入门 → 进阶</strong></div><div class="reading-stat"><span>主题</span><strong>CI / CD</strong></div></aside>
+  </main>
+  <footer><div class="footer-inner"><span><strong>ENGINEERING NOTES</strong>　把工程实践变成团队能力</span><span>© 2026 工程效能团队 · 技术内容仅供学习与实践参考</span></div></footer>
+  <script>
+    const bar = document.getElementById('progress');
+    const updateProgress = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (max > 0 ? window.scrollY / max * 100 : 0) + '%';
+    };
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+    document.querySelectorAll('.copy').forEach(button => button.addEventListener('click', async () => {
+      const text = button.closest('.code').querySelector('pre').innerText;
+      try { await navigator.clipboard.writeText(text); button.textContent = '已复制'; }
+      catch { button.textContent = '复制失败'; }
+      setTimeout(() => button.textContent = '复制代码', 1500);
+    }));
+    const sections = [...document.querySelectorAll('.article h2[id], .article p[id]')];
+    const links = [...document.querySelectorAll('.toc a')];
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id));
+      });
+    }, { rootMargin: '-15% 0px -75% 0px' });
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
